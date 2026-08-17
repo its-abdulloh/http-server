@@ -13,15 +13,7 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
             data = conn.recv(1024)
             if not data:
                 break
-            print(data)
-            response = (
-                    "HTTP/1.1 200 OK\r\n"
-                    "Content-Type: text/plain\r\n"
-                    "Content-Length:12\r\n"
-                    "\r\n"
-                    "Hello world!"
-            )
             
-            conn.sendall(response.encode())
+            conn.sendall(data)
 
 
