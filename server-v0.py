@@ -28,11 +28,27 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
         with conn:
             print(f"Connection accepted from ({addr})")
 
-            while True:
-                data = conn.recv(1024)
-                if data:
-                    print(f"Recieved : {data.decode()}")
-                    conn.sendall(b"Greetings from the server!")
-                if not data:
+            data=""
+            while b"\r\n\r\n" not in data:
+                chunk = conn.recv(1024)
+
+                if not chunk:
                     break
+
+                data+=chunk
+            
+            end = data.find(b"\r\n\r\n")
+            headers = data[:end+4]
+
+            request_line = data.split(b"\r\n")[0].split(b" ")
+            METHOD = request_line[0].decode()
+            PATH = request_line[1].decode()
+            HTTP_VERSION = request_line[2].decode()
+
+            
+
+
+
+            
+
 
