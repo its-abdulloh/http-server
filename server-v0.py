@@ -21,6 +21,7 @@ HOST = "0.0.0.0"
 PORT = 8080
 
 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((HOST,PORT))
     s.listen()
     print(f"Listening on ({HOST},{PORT})")
@@ -30,21 +31,18 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
             print(f"Connection accepted from ({addr})")
 
             data=""
-            while b"\r\n\r\n" not in data:
+            while "\r\n\r\n" not in data:
                 chunk = conn.recv(1024)
 
                 if not chunk:
                     break
 
-                data+=chunk
+                data+=chunk.decode()
             
-            end = data.find(b"\r\n\r\n")
+            end = data.find("\r\n\r\n")
             headers = data[:end+4]
 
-            request_line = data.split(b"\r\n")[0].split(b" ")
-            method = request_line[0].decode()
-            path = request_line[1].decode()
-            HTTP_VERSION = request_line[2].decode()
+            method, path, HTTP_VERSION = data.split("\r\n")[0].split(" ")
 
             if method!="GET":
                 response = (
@@ -59,7 +57,7 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
             if path == "/":
                 path = "/index.html"
             www = Path("./www").resolve()
-            file_path = www / path.lstrip("/").resolve()
+            file_path = (www / path.lstrip("/")).resolve()
 
             if not file_path.is_relative_to(www):
                 response = (
