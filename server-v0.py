@@ -53,7 +53,7 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
                     "\r\n"
                 )
 
-                conn.sendall(response)
+                conn.sendall(response.encode())
                 continue
 
             if path == "/":
@@ -68,8 +68,41 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
                     "\r\n"
                 )
 
-                conn.sendall(response)
+                conn.sendall(response.encode())
                 continue
+
+            if not file_path.is_file():
+                response = (
+                    "HTTP/1.1 404 Not Found\r\n"
+                    "Content-Type: text/html; charset=UTF-8\r\n"
+                    "Content-Length:22\r\n"
+                    "\r\n"
+                    "<h1>404.Page Not Found</h1>"
+                )
+
+                conn.sendall(response.encode())
+                continue
+
+            response = (
+                "HTTP/1.1 200 OK\r\n"
+                "Content-Type: text/html\r\n"
+                f"Content-Length: {file_path.stat().st_size}\r\n"
+                "\r\n"
+            )
+            
+            conn.sendall(response.encode())
+
+            with open(file_path,"rb") as f:
+                while True:
+                    chunk = f.read(4096)
+
+                    if not chunk:
+                        break
+                        
+                    conn.sendall(chunk)
+
+
+
 
 
 
